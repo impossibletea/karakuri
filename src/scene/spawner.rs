@@ -5,6 +5,12 @@ pub struct Spawner {
     pub(crate) entities_to_remove: Vec<Entity>,
 }
 
+impl Default for Spawner {
+    fn default() -> Spawner {
+        Spawner::new()
+    }
+}
+
 impl Spawner {
     pub fn new() -> Spawner {
         Spawner {
