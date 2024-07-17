@@ -1,3 +1,4 @@
+#[derive(Debug, Clone, PartialEq)]
 pub struct Resolution {
     pub width: u64,
     pub height: u64,

@@ -1,4 +1,4 @@
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct Vector2 {
     pub x: f64,
     pub y: f64,
@@ -6,18 +6,16 @@ pub struct Vector2 {
 
 impl Default for Vector2 {
     fn default() -> Vector2 {
-        Vector2::zero()
+        Vector2::ZERO
     }
 }
 
 impl Vector2 {
-    pub fn new(x: f64, y: f64) -> Self {
+    pub fn new(x: f64, y: f64) -> Vector2 {
         Self { x, y }
     }
 
-    pub fn zero() -> Self {
-        Self::new(0., 0.)
-    }
+    pub const ZERO: Vector2 = Vector2 { x: 0., y: 0. };
 
     pub fn add(&mut self, other: &Vector2) {
         self.x += other.x;

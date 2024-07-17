@@ -17,7 +17,7 @@ fn test_new() {
 
 #[test]
 fn test_zero() {
-    let v = Vector2::zero();
+    let v = Vector2::ZERO;
 
     assert_eq!(v.x, 0.);
     assert_eq!(v.y, 0.);
