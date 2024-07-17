@@ -1,7 +1,9 @@
+pub use components_payload::ComponentsPayload;
+pub use figure::Figure;
 pub use name::Name;
 pub use transform::Transform;
-pub use figure::Figure;
 
+mod components_payload;
+mod figure;
 mod name;
 mod transform;
-mod figure;
