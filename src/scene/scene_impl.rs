@@ -30,6 +30,8 @@ impl Default for Scene {
 
 impl Scene {
     pub fn new() -> Scene {
+        println!("{}", mem::size_of_val(&MAX_ENTITIES));
+
         Scene {
             next_entity: 0,
             free_entities: Vec::new(),
@@ -182,5 +184,15 @@ mod tests {
 
         assert!(scene.entities[2].is_some());
         assert!(scene.name_components[2].is_some());
+
+        scene.spawner.add_entity(ComponentsPayload::from_name(Name::new(String::from("Captain Toad"))));
+
+        scene.add_entities();
+        scene.remove_entities();
+
+        assert!(scene.free_entities.is_empty());
+        assert_eq!(scene.next_entity, 3);
+        assert!(scene.entities[1].is_some());
+        assert_eq!(scene.name_components[1].as_ref().unwrap().value(), "Captain Toad");
     }
 }
