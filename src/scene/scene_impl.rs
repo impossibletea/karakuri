@@ -32,8 +32,6 @@ impl Default for Scene {
 
 impl Scene {
     pub fn new() -> Scene {
-        println!("{}", mem::size_of_val(&MAX_ENTITIES));
-
         Scene {
             next_entity: 0,
             free_entities: Vec::new(),
@@ -104,6 +102,8 @@ impl Scene {
     pub fn add_initial_entities(&mut self, component_payloads: Vec<ComponentsPayload>) {
         let payloads_count = component_payloads.len();
 
+        let mut entities_to_start = Vec::new();
+
         for (entity, payload) in component_payloads.into_iter().enumerate() {
             if payloads_count >= MAX_ENTITIES {
                 panic!(
@@ -113,9 +113,12 @@ impl Scene {
             };
 
             self.populate_entity(entity, payload);
+            entities_to_start.push(entity);
         }
 
         self.next_entity = payloads_count;
+
+        self.start_entities(entities_to_start);
     }
 
     fn add_entities(&mut self) {
@@ -137,18 +140,7 @@ impl Scene {
             entities_to_start.push(entity);
         }
 
-        for entity in entities_to_start {
-            let behavior = &mut self.behavior_components[entity];
-
-            match behavior {
-                None => continue,
-                Some(behavior) => behavior.start(ComponentsCtx {
-                    names: &self.name_components,
-                    transforms: &mut self.transform_components,
-                    figures: &self.figure_components,
-                }),
-            }
-        }
+        self.start_entities(entities_to_start);
     }
 
     fn remove_entities(&mut self) {
@@ -161,6 +153,21 @@ impl Scene {
             match entity {
                 None => (),
                 Some(entity) => self.depopulate_entity(entity),
+            }
+        }
+    }
+
+    fn start_entities(&mut self, entities_to_start: Vec<Entity>) {
+        for entity in entities_to_start {
+            let behavior = &mut self.behavior_components[entity];
+
+            match behavior {
+                None => continue,
+                Some(behavior) => behavior.start(ComponentsCtx {
+                    names: &self.name_components,
+                    transforms: &mut self.transform_components,
+                    figures: &self.figure_components,
+                }),
             }
         }
     }

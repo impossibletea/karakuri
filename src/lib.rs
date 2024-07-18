@@ -1,3 +1,5 @@
+pub use core::InputResult;
+pub use engine::Engine;
 pub use entity::Entity;
 pub use scene::Scene;
 
