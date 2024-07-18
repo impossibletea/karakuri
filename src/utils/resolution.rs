@@ -1,11 +1,11 @@
 #[derive(Debug, Clone, PartialEq)]
 pub struct Resolution {
-    pub width: u64,
-    pub height: u64,
+    pub width: u32,
+    pub height: u32,
 }
 
 impl Resolution {
-    pub fn new(width: u64, height: u64) -> Resolution {
+    pub fn new(width: u32, height: u32) -> Resolution {
         Resolution { width, height }
     }
 }
@@ -14,8 +14,8 @@ impl Resolution {
 mod tests {
     use super::*;
 
-    const TEST_WIDTH: u64 = 1920;
-    const TEST_HEIGHT: u64 = 1080;
+    const TEST_WIDTH: u32 = 1920;
+    const TEST_HEIGHT: u32 = 1080;
 
     #[test]
     fn test_new() {
