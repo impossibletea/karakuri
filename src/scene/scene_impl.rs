@@ -111,3 +111,76 @@ impl Scene {
         self.free_entities.push(entity);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{math::Vector2, utils::Color};
+
+    use super::*;
+
+    #[test]
+    fn test_add_initial_entities() {
+        let mut scene = Scene::new();
+
+        scene.add_initial_entities(vec![
+            ComponentsPayload::new(
+                Name::new(String::from("Mario")),
+                Transform::default(),
+                Some(Figure::new(Color::RED, Vector2::new(5., 10.))),
+            ),
+            ComponentsPayload::new(
+                Name::new(String::from("Bowser")),
+                Transform::default(),
+                Some(Figure::new(Color::RED, Vector2::new(5., 10.))),
+            ),
+        ]);
+
+        assert_eq!(scene.next_entity, 2);
+
+        assert!(scene.entities[0].is_some());
+        assert!(scene.entities[1].is_some());
+        assert!(scene.entities[2].is_none());
+
+        assert_eq!(scene.name_components[0].as_ref().unwrap().value(), "Mario");
+        assert_eq!(scene.name_components[1].as_ref().unwrap().value(), "Bowser");
+        assert!(scene.name_components[2].is_none());
+    }
+
+    #[test]
+    fn test_add_and_remove_via_spawner() {
+        let mut scene = Scene::new();
+
+        scene.add_initial_entities(vec![
+            ComponentsPayload::new(
+                Name::new(String::from("Mario")),
+                Transform::default(),
+                Some(Figure::new(Color::RED, Vector2::new(5., 10.))),
+            ),
+            ComponentsPayload::new(
+                Name::new(String::from("Bowser")),
+                Transform::default(),
+                Some(Figure::new(Color::RED, Vector2::new(5., 10.))),
+            ),
+        ]);
+
+        scene.spawner.add_entity(ComponentsPayload::from_name(Name::new(String::from("Peach"))));
+
+        scene.add_entities();
+        scene.remove_entities();
+
+        assert_eq!(scene.next_entity, 3);
+        assert!(scene.entities[2].is_some());
+
+        scene.spawner.remove_entity(1);
+
+        scene.add_entities();
+        scene.remove_entities();
+
+        assert_eq!(scene.free_entities.len(), 1);
+        assert!(scene.entities[1].is_none());
+        assert!(scene.name_components[1].is_none());
+
+        assert!(scene.entities[2].is_some());
+        assert!(scene.name_components[2].is_some());
+    }
+}

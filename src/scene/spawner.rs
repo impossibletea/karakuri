@@ -39,8 +39,12 @@ mod tests {
     fn test_add_entity() {
         let mut spawner = Spawner::new();
 
-        spawner.add_entity(ComponentsPayload::from_name(Name::new(String::from("Sonic"))));
-        spawner.add_entity(ComponentsPayload::from_name(Name::new(String::from("Tails"))));
+        spawner.add_entity(ComponentsPayload::from_name(Name::new(String::from(
+            "Sonic",
+        ))));
+        spawner.add_entity(ComponentsPayload::from_name(Name::new(String::from(
+            "Tails",
+        ))));
 
         assert_eq!(spawner.entities_to_add.len(), 2);
     }
