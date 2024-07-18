@@ -2,6 +2,7 @@ use std::mem;
 
 use crate::{
     components::{Behavior, ComponentsCtx, ComponentsPayload, Figure, Name, Transform},
+    core::{FpsController, InputController, Renderer},
     Entity,
 };
 
@@ -47,9 +48,57 @@ impl Scene {
         }
     }
 
-    pub fn play(&mut self) {
-        self.add_entities();
-        self.remove_entities();
+    pub fn play(
+        &mut self,
+        fps_controller: &mut FpsController,
+        input_controller: &mut InputController,
+        renderer: &mut Renderer,
+    ) {
+        loop {
+            // Prepare
+            let delta_time = fps_controller.cap_framerate();
+
+            input_controller.process();
+            let input_result = input_controller.result();
+            if input_result.should_quit {
+                break;
+            }
+
+            // Update
+            self.add_entities();
+            self.remove_entities();
+
+            for behavior in &mut self.behavior_components {
+                match behavior {
+                    None => continue,
+                    Some(behavior) => behavior.update(
+                        delta_time,
+                        input_result,
+                        &mut self.spawner,
+                        ComponentsCtx {
+                            names: &self.name_components,
+                            transforms: &mut self.transform_components,
+                            figures: &self.figure_components,
+                        },
+                    ),
+                }
+            }
+
+            // Render
+            renderer.start_frame();
+            for entity in self.entities {
+                match entity {
+                    None => continue,
+                    Some(entity) => {
+                        let transform = self.transform_components[entity].as_ref().unwrap();
+                        let figure = self.figure_components[entity].as_ref().unwrap(); // TODO: Can't unwrap!
+
+                        renderer.filled_rectangle(&transform.position, &figure.size, &figure.color);
+                    }
+                }
+            }
+            renderer.finish_frame();
+        }
     }
 
     pub fn add_initial_entities(&mut self, component_payloads: Vec<ComponentsPayload>) {

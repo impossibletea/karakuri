@@ -1,4 +1,4 @@
-use crate::scene::Spawner;
+use crate::{core::InputResult, scene::Spawner};
 
 use super::{Figure, Name, Transform};
 
@@ -10,7 +10,13 @@ pub struct ComponentsCtx<'a> {
 
 pub trait Behavior {
     fn start(&mut self, components: ComponentsCtx);
-    fn update(&mut self, delta_time: f64, spawner: &mut Spawner, components: ComponentsCtx);
+    fn update(
+        &mut self,
+        delta_time: f64,
+        input_result: &InputResult,
+        spawner: &mut Spawner,
+        components: ComponentsCtx,
+    );
     fn destroy(&mut self);
 
     fn id_by_name(&self, name_components: &[Option<Name>], name: &str) -> Option<usize> {
