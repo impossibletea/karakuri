@@ -6,5 +6,5 @@ pub mod math;
 pub mod scene;
 pub mod utils;
 
-mod entity;
 mod core;
+mod entity;
