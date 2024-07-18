@@ -45,6 +45,7 @@ mod tests {
         assert_eq!(spawner.entities_to_add.len(), 2);
     }
 
+    #[test]
     fn test_remove_entity() {
         let mut spawner = Spawner::new();
 
