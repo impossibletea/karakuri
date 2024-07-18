@@ -208,7 +208,7 @@ impl Renderer {
             .window(title, resolution.width, resolution.height)
             .position_centered()
             .borderless()
-            .fullscreen()
+            .fullscreen_desktop() // TODO: Chang to fullscreen
             .build()
             .unwrap_or_else(|e| {
                 panic!("Failed to create SDL2 window: {}", e);
