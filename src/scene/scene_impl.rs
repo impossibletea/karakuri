@@ -1,7 +1,7 @@
 use std::mem;
 
 use crate::{
-    components::{ComponentsPayload, Figure, Name, Transform},
+    components::{Behavior, ComponentsCtx, ComponentsPayload, Figure, Name, Transform},
     Entity,
 };
 
@@ -18,6 +18,7 @@ pub struct Scene {
     name_components: [Option<Name>; MAX_ENTITIES],
     transform_components: [Option<Transform>; MAX_ENTITIES],
     figure_components: [Option<Figure>; MAX_ENTITIES],
+    behavior_components: [Option<Box<dyn Behavior>>; MAX_ENTITIES],
 
     spawner: Spawner,
 }
@@ -40,12 +41,13 @@ impl Scene {
             name_components: [(); MAX_ENTITIES].map(|_| None),
             transform_components: [(); MAX_ENTITIES].map(|_| None),
             figure_components: [(); MAX_ENTITIES].map(|_| None),
+            behavior_components: [(); MAX_ENTITIES].map(|_| None),
 
             spawner: Spawner::new(),
         }
     }
 
-    pub(crate) fn play(&mut self) {
+    pub fn play(&mut self) {
         self.add_entities();
         self.remove_entities();
     }
@@ -68,6 +70,8 @@ impl Scene {
     }
 
     fn add_entities(&mut self) {
+        let mut entities_to_start = Vec::new();
+
         for payload in mem::take(&mut self.spawner.entities_to_add) {
             let entity = self.free_entities.pop().unwrap_or_else(|| {
                 self.next_entity += 1;
@@ -80,6 +84,21 @@ impl Scene {
             }
 
             self.populate_entity(entity, payload);
+
+            entities_to_start.push(entity);
+        }
+
+        for entity in entities_to_start {
+            let behavior = &mut self.behavior_components[entity];
+
+            match behavior {
+                None => continue,
+                Some(behavior) => behavior.start(ComponentsCtx {
+                    names: &self.name_components,
+                    transforms: &mut self.transform_components,
+                    figures: &self.figure_components,
+                }),
+            }
         }
     }
 
@@ -101,6 +120,7 @@ impl Scene {
         self.entities[entity] = Some(entity);
         self.name_components[entity] = Some(payload.name);
         self.transform_components[entity] = Some(payload.transform);
+        self.behavior_components[entity] = payload.behavior;
         self.figure_components[entity] = payload.figure;
     }
 
@@ -108,6 +128,7 @@ impl Scene {
         self.entities[entity] = None;
         self.name_components[entity] = None;
         self.transform_components[entity] = None;
+        self.behavior_components[entity] = None;
         self.figure_components[entity] = None;
 
         self.free_entities.push(entity);
@@ -128,11 +149,13 @@ mod tests {
             ComponentsPayload::new(
                 Name::new(String::from("Mario")),
                 Transform::default(),
+                None,
                 Some(Figure::new(Color::RED, Vector2::new(5., 10.))),
             ),
             ComponentsPayload::new(
                 Name::new(String::from("Bowser")),
                 Transform::default(),
+                None,
                 Some(Figure::new(Color::RED, Vector2::new(5., 10.))),
             ),
         ]);
@@ -156,16 +179,22 @@ mod tests {
             ComponentsPayload::new(
                 Name::new(String::from("Mario")),
                 Transform::default(),
+                None,
                 Some(Figure::new(Color::RED, Vector2::new(5., 10.))),
             ),
             ComponentsPayload::new(
                 Name::new(String::from("Bowser")),
                 Transform::default(),
+                None,
                 Some(Figure::new(Color::RED, Vector2::new(5., 10.))),
             ),
         ]);
 
-        scene.spawner.add_entity(ComponentsPayload::from_name(Name::new(String::from("Peach"))));
+        scene
+            .spawner
+            .add_entity(ComponentsPayload::from_name(Name::new(String::from(
+                "Peach",
+            ))));
 
         scene.add_entities();
         scene.remove_entities();
@@ -185,7 +214,11 @@ mod tests {
         assert!(scene.entities[2].is_some());
         assert!(scene.name_components[2].is_some());
 
-        scene.spawner.add_entity(ComponentsPayload::from_name(Name::new(String::from("Captain Toad"))));
+        scene
+            .spawner
+            .add_entity(ComponentsPayload::from_name(Name::new(String::from(
+                "Captain Toad",
+            ))));
 
         scene.add_entities();
         scene.remove_entities();
@@ -193,6 +226,9 @@ mod tests {
         assert!(scene.free_entities.is_empty());
         assert_eq!(scene.next_entity, 3);
         assert!(scene.entities[1].is_some());
-        assert_eq!(scene.name_components[1].as_ref().unwrap().value(), "Captain Toad");
+        assert_eq!(
+            scene.name_components[1].as_ref().unwrap().value(),
+            "Captain Toad"
+        );
     }
 }
