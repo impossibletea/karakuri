@@ -1,9 +1,9 @@
-pub use walls::left_wall;
-pub use walls::top_wall;
-pub use walls::right_wall;
-pub use paddle::paddle;
 pub use ball::ball;
+pub use paddle::paddle;
+pub use walls::left_wall;
+pub use walls::right_wall;
+pub use walls::top_wall;
 
-mod walls;
-mod paddle;
 mod ball;
+mod paddle;
+mod walls;
