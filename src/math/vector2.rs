@@ -265,7 +265,7 @@ impl DivAssign<f64> for Vector2 {
     fn div_assign(&mut self, other: f64) {
         let other: Vector2 = other.into();
 
-        *self *= other;
+        *self /= other;
     }
 }
 
